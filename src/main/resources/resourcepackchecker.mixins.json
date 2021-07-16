@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "de.maxhenkel.resourcepackchecker.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "ClientPackSourceMixin",
+    "AbstractPackResourcesMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
