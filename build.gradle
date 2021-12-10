@@ -14,6 +14,10 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven { url = "https://maven.fabricmc.net/" }
+    maven {
+        name = 'henkelmax.public'
+        url = 'https://maven.maxhenkel.de/repository/public'
+    }
 }
 
 runClient.doFirst {
