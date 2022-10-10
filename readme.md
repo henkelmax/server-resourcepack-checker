@@ -1,3 +1,7 @@
 # Server Resource Pack Checker
 
-This mod doesn't load server resource packs if the same resource pack is already loaded.
+This client side Fabric mod skips loading server resource packs if the client already has it.
+
+This avoids the annoying Mojang loading bar when joining and leaving servers.
+
+It does this by comparing the file hashes of the resource pack.
