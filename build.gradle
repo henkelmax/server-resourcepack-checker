@@ -10,7 +10,7 @@ buildscript {
 
 
 plugins {
-    id "fabric-loom" version "0.12-SNAPSHOT"
+    id "fabric-loom" version "1.0-SNAPSHOT"
     id "com.matthewprenger.cursegradle" version "1.4.0"
     id "com.github.johnrengelman.shadow" version "7.1.0"
     id "com.modrinth.minotaur" version "2.+"
@@ -52,9 +52,9 @@ dependencies {
 
 processResources {
     filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "minecraft_dependency": project.minecraft_dependency,
-                "loader_version": project.loader_version
+        expand "version": version,
+                "minecraft_dependency": minecraft_dependency,
+                "loader_version": loader_version
     }
 }
 
@@ -69,7 +69,7 @@ java {
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}_${archivesBaseName}" }
     }
 }
 
@@ -83,7 +83,7 @@ curseforge {
         addGameVersion curseforge_minecraft_version
         addGameVersion "Fabric"
         addGameVersion "Java 17"
-        mainArtifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar")) {
+        mainArtifact(file("${buildDir}/libs/${archivesBaseName}-${version}.jar")) {
             displayName = "[FABRIC][${minecraft_version}] ${mod_name} ${mod_version}"
         }
         afterEvaluate {

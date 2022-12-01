@@ -6,8 +6,8 @@
   "mixins": [
   ],
   "client": [
-    "ClientPackSourceMixin",
-    "AbstractPackResourcesMixin",
+    "DownloadedPackSourceMixin",
+    "FilePackResourcesMixin",
     "ClientPacketListenerMixin"
   ],
   "injectors": {

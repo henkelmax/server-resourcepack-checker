@@ -2,7 +2,7 @@ package de.maxhenkel.resourcepackchecker.mixin;
 
 import de.maxhenkel.resourcepackchecker.IFilePackResource;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.ClientPackSource;
+import net.minecraft.client.resources.DownloadedPackSource;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
@@ -18,8 +18,8 @@ import java.io.FileInputStream;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-@Mixin(ClientPackSource.class)
-public class ClientPackSourceMixin {
+@Mixin(DownloadedPackSource.class)
+public class DownloadedPackSourceMixin {
 
     @Shadow
     private Pack serverPack;
