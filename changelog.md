@@ -1,1 +1,1 @@
-- Added prompt skip when `resource-pack-sha1` is set
+- Updated to 1.20
