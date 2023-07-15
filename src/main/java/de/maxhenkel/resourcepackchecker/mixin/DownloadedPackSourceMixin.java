@@ -21,7 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
@@ -38,6 +40,9 @@ public class DownloadedPackSourceMixin {
         String serverPackSha1 = ShaUtils.getSha1(file);
 
         if (ResourcePackChecker.CLIENT_CONFIG.saveServerPacks.get()) {
+            PackRepository resourcePackRepository = Minecraft.getInstance().getResourcePackRepository();
+            serverPack = null;
+
             Path resourcePack = Minecraft.getInstance().getResourcePackDirectory().resolve("server_%s.zip".formatted(file.getName()));
             if (Files.notExists(resourcePack)) {
                 try {
@@ -46,12 +51,10 @@ public class DownloadedPackSourceMixin {
                     ResourcePackChecker.LOGGER.error("Failed to copy server pack", e);
                     return;
                 }
+                resourcePackRepository.reload();
             }
 
-            PackRepository resourcePackRepository = Minecraft.getInstance().getResourcePackRepository();
-            resourcePackRepository.reload();
-
-            boolean changedPack = false;
+            Pack newPack = null;
 
             for (Pack pack : resourcePackRepository.getAvailablePacks()) {
                 File packFile = getPackFile(pack);
@@ -60,28 +63,56 @@ public class DownloadedPackSourceMixin {
                 }
                 String packSha1 = getPackSha(pack);
                 if (serverPackSha1.equals(packSha1)) {
-                    if (resourcePackRepository.addPack(pack.getId())) {
-                        changedPack = true;
-                        ResourcePackChecker.LOGGER.info("Enabled new server pack");
-                    }
-                    continue;
-                }
-                if (SERVER_PACK_PATTERN.matcher(packFile.getName()).matches()) {
-                    if (resourcePackRepository.removePack(pack.getId())) {
-                        changedPack = true;
-                        ResourcePackChecker.LOGGER.info("Disabled old server pack");
-                    }
+                    newPack = pack;
+                    break;
                 }
             }
 
-            serverPack = null;
+            if (newPack == null) {
+                ResourcePackChecker.LOGGER.error("Could not find resource pack with sha1 {}", serverPackSha1);
+                return;
+            }
+
+            List<Pack> selectedPacks = new ArrayList<>(resourcePackRepository.getSelectedPacks());
+
+            List<Pack> toRemove = new ArrayList<>();
+
+            int replaceIndex = -1;
+            for (Pack pack : selectedPacks) {
+                File packFile = getPackFile(pack);
+                if (packFile == null) {
+                    continue;
+                }
+                String packSha1 = getPackSha(pack);
+                if (SERVER_PACK_PATTERN.matcher(packFile.getName()).matches()) {
+                    if (serverPackSha1.equals(packSha1)) {
+                        if (replaceIndex >= 0) {
+                            toRemove.add(selectedPacks.get(replaceIndex));
+                        }
+                        replaceIndex = selectedPacks.indexOf(pack);
+                    } else if (replaceIndex < 0) {
+                        replaceIndex = selectedPacks.indexOf(pack);
+                    } else {
+                        toRemove.add(pack);
+                    }
+                }
+            }
             CompletableFuture<Void> future;
-            if (changedPack) {
+            if (replaceIndex < 0) {
+                selectedPacks.add(newPack);
                 future = Minecraft.getInstance().delayTextureReload();
-            } else {
+            } else if (selectedPacks.get(replaceIndex).getId().equals(newPack.getId())) {
                 future = new CompletableFuture<>();
                 future.complete(null);
+            } else {
+                selectedPacks.set(replaceIndex, newPack);
+                future = Minecraft.getInstance().delayTextureReload();
             }
+            if (selectedPacks.removeAll(toRemove)) {
+                future = Minecraft.getInstance().delayTextureReload();
+            }
+            resourcePackRepository.setSelected(selectedPacks.stream().map(Pack::getId).toList());
+
             cir.setReturnValue(future);
             return;
         }

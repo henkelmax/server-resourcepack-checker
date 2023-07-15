@@ -1,1 +1,1 @@
-- Added save server packs config option
+- Keep resource pack order when updating resource packs
