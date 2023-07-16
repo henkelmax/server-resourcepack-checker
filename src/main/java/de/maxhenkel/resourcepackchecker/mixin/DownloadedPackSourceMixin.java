@@ -5,7 +5,9 @@ import de.maxhenkel.resourcepackchecker.ResourcePackChecker;
 import de.maxhenkel.resourcepackchecker.ShaUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.DownloadedPackSource;
+import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
@@ -30,7 +32,7 @@ import java.util.regex.Pattern;
 @Mixin(DownloadedPackSource.class)
 public class DownloadedPackSourceMixin {
 
-    private static final Pattern SERVER_PACK_PATTERN = Pattern.compile("server_.{40}\\.zip");
+    private static final Pattern SERVER_PACK_PATTERN = Pattern.compile("^server_.{40}.*\\.zip$");
 
     @Shadow
     private Pack serverPack;
@@ -41,9 +43,22 @@ public class DownloadedPackSourceMixin {
 
         if (ResourcePackChecker.CLIENT_CONFIG.saveServerPacks.get()) {
             PackRepository resourcePackRepository = Minecraft.getInstance().getResourcePackRepository();
+            Path resourcePackDirectory = Minecraft.getInstance().getResourcePackDirectory();
             serverPack = null;
 
-            Path resourcePack = Minecraft.getInstance().getResourcePackDirectory().resolve("server_%s.zip".formatted(file.getName()));
+            String packName = "";
+            try (FilePackResources packResources = new FilePackResources(file.getName(), file, false)) {
+                PackMetadataSection metadataSection = packResources.getMetadataSection(PackMetadataSection.TYPE);
+                if (metadataSection != null) {
+                    packName = metadataSection.getDescription().getString().replaceAll("§[0-9a-zA-Z]", "").replace("\n", " ").replaceAll("[^a-zA-Z0-9-_. ]", "");
+                } else {
+                    ResourcePackChecker.LOGGER.error("Could not find metadata section in server pack");
+                }
+            } catch (IOException e) {
+                ResourcePackChecker.LOGGER.error("Failed to read server pack metadata", e);
+            }
+
+            Path resourcePack = resourcePackDirectory.resolve("server_%s%s.zip".formatted(serverPackSha1, "_%s".formatted(packName)));
             if (Files.notExists(resourcePack)) {
                 try {
                     Files.copy(file.toPath(), resourcePack);
@@ -54,19 +69,7 @@ public class DownloadedPackSourceMixin {
                 resourcePackRepository.reload();
             }
 
-            Pack newPack = null;
-
-            for (Pack pack : resourcePackRepository.getAvailablePacks()) {
-                File packFile = getPackFile(pack);
-                if (packFile == null) {
-                    continue;
-                }
-                String packSha1 = getPackSha(pack);
-                if (serverPackSha1.equals(packSha1)) {
-                    newPack = pack;
-                    break;
-                }
-            }
+            Pack newPack = findPack(serverPackSha1, resourcePack);
 
             if (newPack == null) {
                 ResourcePackChecker.LOGGER.error("Could not find resource pack with sha1 {}", serverPackSha1);
@@ -85,7 +88,7 @@ public class DownloadedPackSourceMixin {
                 }
                 String packSha1 = getPackSha(pack);
                 if (SERVER_PACK_PATTERN.matcher(packFile.getName()).matches()) {
-                    if (serverPackSha1.equals(packSha1)) {
+                    if (serverPackSha1.equals(packSha1) && packFile.getName().equals(resourcePack.getFileName().toString())) {
                         if (replaceIndex >= 0) {
                             toRemove.add(selectedPacks.get(replaceIndex));
                         }
@@ -128,6 +131,25 @@ public class DownloadedPackSourceMixin {
                 break;
             }
         }
+    }
+
+    @Unique
+    @Nullable
+    private Pack findPack(String sha1, Path path) {
+        for (Pack pack : Minecraft.getInstance().getResourcePackRepository().getAvailablePacks()) {
+            File packFile = getPackFile(pack);
+            if (packFile == null) {
+                continue;
+            }
+            if (!packFile.getName().equals(path.getFileName().toString())) {
+                continue;
+            }
+            String packSha1 = getPackSha(pack);
+            if (sha1.equals(packSha1)) {
+                return pack;
+            }
+        }
+        return null;
     }
 
     @Unique
