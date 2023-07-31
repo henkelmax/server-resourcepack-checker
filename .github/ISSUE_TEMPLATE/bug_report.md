@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: bug
+labels: triage
 assignees: henkelmax
 
 ---
@@ -25,9 +25,8 @@ Don't paste the complete logs into the issue.
 You can use [https://gist.github.com/](https://gist.github.com/).
 
 **Versions**
-- Minecraft version
 - Fabric Loader version
-- Fabric API version
+- Minecraft version
 - Mod version
 
 **Other mods**
