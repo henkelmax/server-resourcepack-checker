@@ -13,6 +13,10 @@ archivesBaseName = archives_base_name
 version = mod_version
 group = maven_group
 
+loom {
+    accessWidenerPath = file('src/main/resources/resourcepackchecker.accesswidener')
+}
+
 repositories {
     mavenLocal()
     mavenCentral()

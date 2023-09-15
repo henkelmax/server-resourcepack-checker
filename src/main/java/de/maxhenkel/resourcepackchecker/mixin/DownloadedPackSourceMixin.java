@@ -47,10 +47,10 @@ public class DownloadedPackSourceMixin {
             serverPack = null;
 
             String packName = "";
-            try (FilePackResources packResources = new FilePackResources(file.getName(), file, false)) {
+            try (FilePackResources packResources = new FilePackResources(file.getName(), new FilePackResources.SharedZipFileAccess(file), false, "")) {
                 PackMetadataSection metadataSection = packResources.getMetadataSection(PackMetadataSection.TYPE);
                 if (metadataSection != null) {
-                    packName = metadataSection.getDescription().getString().replaceAll("§[0-9a-zA-Z]", "").replace("\n", " ").replaceAll("[^a-zA-Z0-9-_. ]", "");
+                    packName = metadataSection.description().getString().replaceAll("§[0-9a-zA-Z]", "").replace("\n", " ").replaceAll("[^a-zA-Z0-9-_. ]", "");
                 } else {
                     ResourcePackChecker.LOGGER.error("Could not find metadata section in server pack");
                 }

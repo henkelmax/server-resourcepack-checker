@@ -13,10 +13,10 @@ public class FilePackResourcesMixin implements IFilePackResource {
 
     @Shadow
     @Final
-    private File file;
+    private FilePackResources.SharedZipFileAccess zipFileAccess;
 
     @Override
     public File getFile() {
-        return file;
+        return zipFileAccess.file;
     }
 }

@@ -1,1 +1,1 @@
-- Keep resource pack order when updating resource packs
+- Updated to 1.20.2

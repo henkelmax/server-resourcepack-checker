@@ -4,9 +4,9 @@ import de.maxhenkel.resourcepackchecker.IFilePackResource;
 import de.maxhenkel.resourcepackchecker.ResourcePackChecker;
 import de.maxhenkel.resourcepackchecker.ShaUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
-import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
+import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,8 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.io.File;
 import java.util.Collection;
 
-@Mixin(ClientPacketListener.class)
-public abstract class ClientPacketListenerMixin {
+@Mixin(ClientCommonPacketListenerImpl.class)
+public abstract class ClientCommonPacketListenerImplMixin {
 
     @Inject(method = "handleResourcePack", at = @At("HEAD"), cancellable = true)
     private void setServerPack(ClientboundResourcePackPacket clientboundResourcePackPacket, CallbackInfo ci) {
@@ -29,7 +29,7 @@ public abstract class ClientPacketListenerMixin {
         }
     }
 
-    @Inject(method = "handleResourcePack", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundResourcePackPacket;isRequired()Z", shift = At.Shift.AFTER), cancellable = true)
+    @Inject(method = "handleResourcePack", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/common/ClientboundResourcePackPacket;isRequired()Z", shift = At.Shift.AFTER), cancellable = true)
     private void handleResourcePack(ClientboundResourcePackPacket packet, CallbackInfo ci) {
         if (packet.getHash().isBlank()) {
             return;
