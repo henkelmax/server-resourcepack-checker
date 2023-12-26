@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "resourcepackchecker",
-  "version": "${version}",
+  "version": "${mod_version}",
   "name": "Server Resource Pack Checker",
   "description": "Server Resource Pack Checker",
   "authors": [
@@ -22,8 +22,7 @@
     "resourcepackchecker.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "minecraft": "${minecraft_dependency}",
-    "java": ">=17"
+    "fabricloader": "${fabric_loader_dependency}",
+    "minecraft": "${minecraft_dependency}"
   }
 }

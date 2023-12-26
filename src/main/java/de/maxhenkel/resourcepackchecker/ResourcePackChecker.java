@@ -18,6 +18,9 @@ public class ResourcePackChecker implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         Minecraft mc = Minecraft.getInstance();
-        CLIENT_CONFIG = ConfigBuilder.build(mc.gameDirectory.toPath().resolve("config").resolve(MODID).resolve("resourcepackchecker.properties"), ClientConfig::new);
+        CLIENT_CONFIG = ConfigBuilder
+                .builder(ClientConfig::new)
+                .path(mc.gameDirectory.toPath().resolve("config").resolve(MODID).resolve("resourcepackchecker.properties"))
+                .build();
     }
 }
