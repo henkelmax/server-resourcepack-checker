@@ -1,8 +1,9 @@
 package de.maxhenkel.resourcepackchecker.mixin;
 
-import de.maxhenkel.resourcepackchecker.IFilePackResource;
 import de.maxhenkel.resourcepackchecker.ResourcePackChecker;
-import de.maxhenkel.resourcepackchecker.ShaUtils;
+import de.maxhenkel.resourcepackchecker.interfaces.FilePackResource;
+import de.maxhenkel.resourcepackchecker.utils.ApplyPackUtils;
+import de.maxhenkel.resourcepackchecker.utils.ShaUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.network.Connection;
@@ -10,9 +11,11 @@ import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackRepository;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -40,19 +43,49 @@ public abstract class ClientCommonPacketListenerImplMixin {
         if (packet.hash().isBlank()) {
             return;
         }
-        Collection<Pack> selectedPacks = Minecraft.getInstance().getResourcePackRepository().getSelectedPacks();
+        Minecraft mc = Minecraft.getInstance();
+        PackRepository repo = mc.getResourcePackRepository();
+        Collection<Pack> selectedPacks = repo.getSelectedPacks();
         for (Pack pack : selectedPacks) {
             PackResources resources = pack.open();
-            if (resources instanceof IFilePackResource) {
-                File f = ((IFilePackResource) resources).getFile();
+            if (resources instanceof FilePackResource filePackResource) {
+                File f = filePackResource.getFile();
+                if (f == null) {
+                    continue;
+                }
                 String packSha1 = ShaUtils.getSha1(f);
                 if (packSha1.equals(packet.hash())) {
-                    connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.ACCEPTED));
+                    sendSuccessful(packet);
                     ci.cancel();
-                    break;
+                    return;
                 }
             }
         }
+
+        Collection<Pack> availablePacks = repo.getAvailablePacks();
+        for (Pack pack : availablePacks) {
+            PackResources resources = pack.open();
+            if (resources instanceof FilePackResource filePackResource) {
+                File f = filePackResource.getFile();
+                if (f == null) {
+                    continue;
+                }
+                String packSha1 = ShaUtils.getSha1(f);
+                if (packSha1.equals(packet.hash())) {
+                    ApplyPackUtils.equipPack(pack);
+                    sendSuccessful(packet);
+                    ci.cancel();
+                    return;
+                }
+            }
+        }
+    }
+
+    @Unique
+    private void sendSuccessful(ClientboundResourcePackPushPacket packet) {
+        connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.ACCEPTED));
+        connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.DOWNLOADED));
+        connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED));
     }
 
 }

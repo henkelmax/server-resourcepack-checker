@@ -1,4 +1,4 @@
-package de.maxhenkel.resourcepackchecker;
+package de.maxhenkel.resourcepackchecker.utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
