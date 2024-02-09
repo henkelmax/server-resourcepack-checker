@@ -53,20 +53,25 @@ public class ServerPacksCacheRepositorySource implements RepositorySource {
             } catch (IllegalArgumentException e) {
                 continue;
             }
-            Path resourcePackFile = Files.list(file).filter(resourcepackPath -> SHA1.matcher(resourcepackPath.getFileName().toString()).matches()).findAny().orElse(null);
-            if (resourcePackFile == null) {
-                continue;
-            }
-            Pack pack = fileToPack(id, resourcePackFile.getFileName().toString(), resourcePackFile);
-            if (pack != null) {
-                consumer.accept(pack);
+            List<Path> packs = Files.list(file).toList();
+            for (Path packPath : packs) {
+                if (!SHA1.matcher(packPath.getFileName().toString()).matches()) {
+                    continue;
+                }
+                if (!Files.isRegularFile(packPath)) {
+                    continue;
+                }
+                Pack pack = fileToPack(id, packPath.getFileName().toString(), packPath);
+                if (pack != null) {
+                    consumer.accept(pack);
+                }
             }
         }
     }
 
     @Nullable
     private Pack fileToPack(UUID id, String hash, Path resourcePackFile) {
-        return Pack.readMetaAndCreate(idFromHash(hash), cachedPackName(id.toString()), false, new FilePackResources.FileResourcesSupplier(resourcePackFile, false), PackType.CLIENT_RESOURCES, Pack.Position.TOP, PackSource.SERVER);
+        return Pack.readMetaAndCreate(idFromHash(hash), cachedPackName(hash), false, new FilePackResources.FileResourcesSupplier(resourcePackFile, false), PackType.CLIENT_RESOURCES, Pack.Position.TOP, PackSource.SERVER);
     }
 
     private Component cachedPackName(String name) {
