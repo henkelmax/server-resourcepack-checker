@@ -1,3 +1,1 @@
-- Fixed not being able to join servers with a server resource pack
-- Added list_cached_server_packs config option
-- Added keep_cached_server_packs config option
+- Updated to 1.20.5

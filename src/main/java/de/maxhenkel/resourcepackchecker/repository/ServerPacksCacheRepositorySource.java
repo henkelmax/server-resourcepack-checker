@@ -5,6 +5,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.server.packs.FilePackResources;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -71,7 +74,7 @@ public class ServerPacksCacheRepositorySource implements RepositorySource {
 
     @Nullable
     private Pack fileToPack(UUID id, String hash, Path resourcePackFile) {
-        return Pack.readMetaAndCreate(idFromHash(hash), cachedPackName(hash), false, new FilePackResources.FileResourcesSupplier(resourcePackFile, false), PackType.CLIENT_RESOURCES, Pack.Position.TOP, PackSource.SERVER);
+        return Pack.readMetaAndCreate(new PackLocationInfo(idFromHash(hash), cachedPackName(hash), PackSource.SERVER, Optional.empty()), new FilePackResources.FileResourcesSupplier(resourcePackFile), PackType.CLIENT_RESOURCES, new PackSelectionConfig(false, Pack.Position.TOP, false));
     }
 
     private Component cachedPackName(String name) {
