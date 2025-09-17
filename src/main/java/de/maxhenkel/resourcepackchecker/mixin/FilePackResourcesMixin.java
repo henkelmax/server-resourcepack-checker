@@ -16,7 +16,7 @@ public class FilePackResourcesMixin implements FilePackResource {
     private FilePackResources.SharedZipFileAccess zipFileAccess;
 
     @Override
-    public File getFile() {
+    public File resourcepack_checker$getFile() {
         return zipFileAccess.file;
     }
 }

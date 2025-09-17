@@ -24,13 +24,13 @@ public class CompositePackResourcesMixin implements FilePackResource {
 
     @Nullable
     @Override
-    public File getFile() {
+    public File resourcepack_checker$getFile() {
         if (primaryPackResources instanceof FilePackResource filePackResource) {
-            return filePackResource.getFile();
+            return filePackResource.resourcepack_checker$getFile();
         }
         for (PackResources resources : packResourcesStack) {
             if (resources instanceof FilePackResource filePackResource) {
-                return filePackResource.getFile();
+                return filePackResource.resourcepack_checker$getFile();
             }
         }
         return null;
