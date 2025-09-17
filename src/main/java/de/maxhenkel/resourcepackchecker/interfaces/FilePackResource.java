@@ -6,6 +6,6 @@ import java.io.File;
 public interface FilePackResource {
 
     @Nullable
-    File getFile();
+    File resourcepack_checker$getFile();
 
 }

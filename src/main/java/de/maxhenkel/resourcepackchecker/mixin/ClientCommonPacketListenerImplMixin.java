@@ -49,7 +49,7 @@ public abstract class ClientCommonPacketListenerImplMixin {
         for (Pack pack : selectedPacks) {
             PackResources resources = pack.open();
             if (resources instanceof FilePackResource filePackResource) {
-                File f = filePackResource.getFile();
+                File f = filePackResource.resourcepack_checker$getFile();
                 if (f == null) {
                     continue;
                 }
@@ -66,7 +66,7 @@ public abstract class ClientCommonPacketListenerImplMixin {
         for (Pack pack : availablePacks) {
             PackResources resources = pack.open();
             if (resources instanceof FilePackResource filePackResource) {
-                File f = filePackResource.getFile();
+                File f = filePackResource.resourcepack_checker$getFile();
                 if (f == null) {
                     continue;
                 }
