@@ -13,7 +13,7 @@ public class ServerPackManagerMixin implements ClearableServerPackManager {
 
     @Shadow
     @Final
-    List<?> packs;
+    private List<?> packs;
 
     @Override
     public void clear() {
