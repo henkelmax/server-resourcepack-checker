@@ -16,7 +16,7 @@ public class ServerPackManagerMixin implements ClearableServerPackManager {
     private List<?> packs;
 
     @Override
-    public void clear() {
+    public void resourcepack_checker$clear() {
         packs.clear();
     }
 }

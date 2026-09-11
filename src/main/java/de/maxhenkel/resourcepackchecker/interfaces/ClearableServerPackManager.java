@@ -2,6 +2,6 @@ package de.maxhenkel.resourcepackchecker.interfaces;
 
 public interface ClearableServerPackManager {
 
-    void clear();
+    void resourcepack_checker$clear();
 
 }

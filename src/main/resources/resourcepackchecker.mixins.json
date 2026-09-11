@@ -9,7 +9,7 @@
     "FilePackResourcesMixin",
     "ClientCommonPacketListenerImplMixin",
     "PackRepositoryMixin",
-    "CompositePackResourcesMixin",
+    "OverlayedPackResourcesMixin",
     "DownloadedPackSourceMixin",
     "ServerPackManagerMixin"
   ],

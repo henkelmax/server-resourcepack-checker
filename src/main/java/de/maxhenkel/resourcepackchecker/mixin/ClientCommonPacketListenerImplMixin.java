@@ -9,7 +9,7 @@ import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
-import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackMetadataResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import org.spongepowered.asm.mixin.Final;
@@ -47,35 +47,37 @@ public abstract class ClientCommonPacketListenerImplMixin {
         PackRepository repo = mc.getResourcePackRepository();
         Collection<Pack> selectedPacks = repo.getSelectedPacks();
         for (Pack pack : selectedPacks) {
-            PackResources resources = pack.open();
-            if (resources instanceof FilePackResource filePackResource) {
-                File f = filePackResource.resourcepack_checker$getFile();
-                if (f == null) {
-                    continue;
-                }
-                String packSha1 = ShaUtils.getSha1(f);
-                if (packSha1.equals(packet.hash())) {
-                    sendSuccessful(packet);
-                    ci.cancel();
-                    return;
+            try (PackMetadataResources resources = pack.openMetadata()) {
+                if (resources instanceof FilePackResource filePackResource) {
+                    File f = filePackResource.resourcepack_checker$getFile();
+                    if (f == null) {
+                        continue;
+                    }
+                    String packSha1 = ShaUtils.getSha1(f);
+                    if (packSha1.equals(packet.hash())) {
+                        sendSuccessful(packet);
+                        ci.cancel();
+                        return;
+                    }
                 }
             }
         }
 
         Collection<Pack> availablePacks = repo.getAvailablePacks();
         for (Pack pack : availablePacks) {
-            PackResources resources = pack.open();
-            if (resources instanceof FilePackResource filePackResource) {
-                File f = filePackResource.resourcepack_checker$getFile();
-                if (f == null) {
-                    continue;
-                }
-                String packSha1 = ShaUtils.getSha1(f);
-                if (packSha1.equals(packet.hash())) {
-                    ApplyPackUtils.equipPack(pack);
-                    sendSuccessful(packet);
-                    ci.cancel();
-                    return;
+            try (PackMetadataResources resources = pack.openMetadata()) {
+                if (resources instanceof FilePackResource filePackResource) {
+                    File f = filePackResource.resourcepack_checker$getFile();
+                    if (f == null) {
+                        continue;
+                    }
+                    String packSha1 = ShaUtils.getSha1(f);
+                    if (packSha1.equals(packet.hash())) {
+                        ApplyPackUtils.equipPack(pack);
+                        sendSuccessful(packet);
+                        ci.cancel();
+                        return;
+                    }
                 }
             }
         }

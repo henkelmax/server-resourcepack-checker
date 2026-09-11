@@ -29,7 +29,7 @@ public abstract class DownloadedPackSourceMixin {
 
     @Shadow
     @Final
-    ServerPackManager manager;
+    private ServerPackManager manager;
 
     @Inject(method = "startReload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/server/PackReloadConfig$Callbacks;packsToLoad()Ljava/util/List;"), cancellable = true)
     private void handleResourcePack(PackReloadConfig.Callbacks callbacks, CallbackInfo ci) {
@@ -41,6 +41,6 @@ public abstract class DownloadedPackSourceMixin {
         callbacks.onSuccess();
         List<String> ids = callbacks.packsToLoad().stream().map(i -> i.path().getFileName().toString()).map(ServerPacksCacheRepositorySource::idFromHash).toList();
         ApplyPackUtils.equipPack(ids);
-        ((ClearableServerPackManager) manager).clear();
+        ((ClearableServerPackManager) manager).resourcepack_checker$clear();
     }
 }

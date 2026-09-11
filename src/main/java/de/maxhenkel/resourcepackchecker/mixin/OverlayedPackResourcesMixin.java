@@ -1,7 +1,8 @@
 package de.maxhenkel.resourcepackchecker.mixin;
 
 import de.maxhenkel.resourcepackchecker.interfaces.FilePackResource;
-import net.minecraft.server.packs.CompositePackResources;
+import net.minecraft.server.packs.OverlayedPackResources;
+import net.minecraft.server.packs.PackMetadataResources;
 import net.minecraft.server.packs.PackResources;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,12 +12,12 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 
-@Mixin(CompositePackResources.class)
-public class CompositePackResourcesMixin implements FilePackResource {
+@Mixin(OverlayedPackResources.class)
+public class OverlayedPackResourcesMixin implements FilePackResource {
 
     @Shadow
     @Final
-    private PackResources primaryPackResources;
+    private PackMetadataResources primaryPackMetadataResources;
 
     @Shadow
     @Final
@@ -25,7 +26,7 @@ public class CompositePackResourcesMixin implements FilePackResource {
     @Nullable
     @Override
     public File resourcepack_checker$getFile() {
-        if (primaryPackResources instanceof FilePackResource filePackResource) {
+        if (primaryPackMetadataResources instanceof FilePackResource filePackResource) {
             return filePackResource.resourcepack_checker$getFile();
         }
         for (PackResources resources : packResourcesStack) {

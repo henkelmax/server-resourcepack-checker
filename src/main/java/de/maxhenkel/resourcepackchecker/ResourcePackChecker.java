@@ -29,7 +29,7 @@ public class ResourcePackChecker implements ClientModInitializer {
 
         if (CLIENT_CONFIG.listCachedServerPacks.get()) {
             Path downloads = mc.gameDirectory.toPath().resolve("downloads");
-            ((PackRepository) mc.getResourcePackRepository()).addSource(new ServerPacksCacheRepositorySource(downloads));
+            ((PackRepository) mc.getResourcePackRepository()).resourcepack_checker$addSource(new ServerPacksCacheRepositorySource(downloads));
         }
     }
 }

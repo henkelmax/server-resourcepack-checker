@@ -4,6 +4,6 @@ import net.minecraft.server.packs.repository.RepositorySource;
 
 public interface PackRepository {
 
-    void addSource(RepositorySource source);
+    void resourcepack_checker$addSource(RepositorySource source);
 
 }
